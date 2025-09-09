@@ -1,3 +1,6 @@
 ## 0.0.1
 
-* TODO: Describe initial release.
+- Initial release 🎉
+- Added `MarkerScreen` widget
+- Added `Mark` model
+- Added controller support for adding/removing marks
