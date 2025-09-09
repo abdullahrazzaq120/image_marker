@@ -79,4 +79,4 @@ file for details.
 
 ## 📸 Demo
 
-![Demo](https://raw.githubusercontent.com/abdullahrazzaq120/image_marker/main/screenshots/demo.png)
+![Demo](https://raw.githubusercontent.com/abdullahrazzaq120/image_marker/main/screenshots/demo.jpeg)
