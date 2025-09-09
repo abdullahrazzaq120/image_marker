@@ -6,6 +6,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_marker/mark_images_widget.dart';
+import 'package:image_marker/sidebar_item.dart';
 import 'package:image_picker/image_picker.dart' show ImagePicker, ImageSource;
 import 'dart:ui' as ui;
 
@@ -21,6 +23,8 @@ class MarkerScreen extends StatefulWidget {
   final List<Mark>? defaultMarks;
   final Function(Mark)? onMarkAdded;
   final Function(Mark)? onMarkFocused;
+  final Function(List<String>)? onMarkImagesClick;
+  final bool? showImages;
   final MarkerController? controller;
 
   const MarkerScreen({
@@ -29,6 +33,8 @@ class MarkerScreen extends StatefulWidget {
     this.defaultMarks,
     this.onMarkAdded,
     this.onMarkFocused,
+    this.onMarkImagesClick,
+    this.showImages,
     this.controller,
   });
 
@@ -50,8 +56,6 @@ class _MarkerScreenState extends State<MarkerScreen> {
   Offset? initialTouchLineOffset;
   bool isTouchedNearStartingPoint = false;
   bool isTouchedNearEndingPoint = false;
-
-  bool isPopupVisible = true;
 
   double imageHeight = 0;
   double imageWidth = 0;
@@ -114,7 +118,7 @@ class _MarkerScreenState extends State<MarkerScreen> {
     await fetchImageSize();
     getDimensionScale();
     setCanvasDimension();
-    if(widget.defaultMarks != null) {
+    if (widget.defaultMarks != null) {
       _initializeDefaultMarks();
     }
   }
@@ -387,88 +391,12 @@ class _MarkerScreenState extends State<MarkerScreen> {
                 ),
               ),
               // captured images
-              if (isPopupVisible &&
+              if (widget.showImages != null &&
+                  widget.showImages! &&
                   globalFocusedMark != null &&
                   globalFocusedMark!.imagePaths != null &&
                   globalFocusedMark!.imagePaths!.isNotEmpty)
-                Positioned(
-                  left: globalFocusedMark!.position.dx - 0,
-                  // Adjust as needed for alignment
-                  top: globalFocusedMark!.position.dy - 0,
-                  // Popup above the mark
-                  child: Material(
-                    color: Colors.transparent,
-                    child: Container(
-                      width: globalFocusedMark!.imagePaths!.length > 1
-                          ? 100
-                          : 55,
-                      height: 80,
-                      padding: const EdgeInsets.all(4.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.black12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 5,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          SizedBox(
-                            height: 40,
-                            child: GridView.builder(
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount:
-                                        globalFocusedMark!.imagePaths!.length >
-                                            1
-                                        ? 2
-                                        : 1,
-                                    crossAxisSpacing: 8,
-                                    mainAxisSpacing: 8,
-                                    childAspectRatio: 1,
-                                  ),
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: globalFocusedMark!.imagePaths!.length
-                                  .clamp(0, 2),
-                              itemBuilder: (context, index) {
-                                return Image.file(
-                                  File(globalFocusedMark!.imagePaths![index]),
-                                  width: 40,
-                                  height: 40,
-                                  fit: BoxFit.cover,
-                                );
-                              },
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {},
-                            child: const Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Text(
-                                  "... more",
-                                  style: TextStyle(
-                                    color: Colors.blue,
-                                    fontSize: 10,
-                                  ),
-                                ),
-                                // SizedBox(width: 4),
-                                // Icon(Icons.arrow_forward, size: 16, color: Colors.blue),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+                MarkImagesWidget(globalFocusedMark: globalFocusedMark, onMarkImagesClick: widget.onMarkImagesClick,),
             ],
           ),
         ),
@@ -479,78 +407,47 @@ class _MarkerScreenState extends State<MarkerScreen> {
             height: MediaQuery.of(context).size.height / 2.2,
             alignment: Alignment.center,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                markIcon(
-                  selectedType: 0,
-                  child: Icon(
-                    Icons.circle,
-                    color: globalType == 0 ? Colors.red : Colors.teal,
-                    size: 25,
-                  ),
-                ),
-                const Divider(height: 1),
-                markIcon(
-                  selectedType: 1,
-                  child: Icon(
-                    Icons.radio_button_unchecked_rounded,
-                    color: globalType == 1 ? Colors.red : Colors.teal,
-                    size: 25,
-                  ),
-                ),
-                const Divider(height: 1),
-                markIcon(
-                  selectedType: 2,
-                  child: Icon(
-                    Icons.close_sharp,
-                    color: globalType == 2 ? Colors.red : Colors.teal,
-                    size: 25,
-                  ),
-                ),
-                const Divider(height: 1),
-                markIcon(
-                  selectedType: 3,
-                  child: Divider(
-                    thickness: 4,
-                    endIndent: 4,
-                    indent: 4,
-                    color: globalType == 3 ? Colors.red : Colors.teal,
-                  ),
-                ),
-                const Divider(height: 1),
-                markIcon(
-                  selectedType: 4,
-                  child: Icon(
-                    Icons.delete,
-                    color:
-                        globalFocusedMark != null && !globalFocusedMark!.isNew
-                        ? Colors.grey
-                        : globalType == 4
-                        ? Colors.red
-                        : Colors.teal,
-                    size: 25,
-                  ),
-                ),
-                const Divider(height: 1),
-                markIcon(
-                  selectedType: 5,
-                  child: Icon(
-                    Icons.camera_alt,
-                    color:
-                        globalFocusedMark != null && !globalFocusedMark!.isNew
-                        ? Colors.grey
-                        : globalType == 5
-                        ? Colors.red
-                        : Colors.teal,
-                    size: 25,
-                  ),
-                ),
-              ],
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: _buildToolbarIcons(),
             ),
           ),
         ),
       ],
     );
+  }
+
+  List<Widget> _buildToolbarIcons() {
+    final List<SideBarItem> items = [
+      SideBarItem(type: 0, icon: Icons.circle),
+      SideBarItem(type: 1, icon: Icons.radio_button_unchecked_rounded),
+      SideBarItem(type: 2, icon: Icons.close_sharp),
+      SideBarItem.divider(type: 3),
+      SideBarItem(type: 4, icon: Icons.delete, isAction: true),
+      SideBarItem(type: 5, icon: Icons.camera_alt, isAction: true),
+    ];
+
+    return items.map((item) {
+      Widget child;
+      Color color;
+      final bool isSelected = globalType == item.type;
+
+      if (item.isAction) {
+        final bool isEnabled = globalFocusedMark != null && globalFocusedMark!.isNew;
+        color = isEnabled
+            ? (isSelected ? Colors.red : Colors.teal)
+            : Colors.grey;
+      } else {
+        color = isSelected ? Colors.red : Colors.teal;
+      }
+
+      if (item.isDivider) {
+        child = Divider(thickness: 4, endIndent: 4, indent: 4, color: color);
+      } else {
+        child = Icon(item.icon, color: color, size: 25);
+      }
+
+      return markIcon(selectedType: item.type, child: child);
+    }).toList();
   }
 
   Widget markIcon({required int selectedType, required Widget child}) {

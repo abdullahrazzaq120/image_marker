@@ -11,6 +11,7 @@ class Mark {
   int type;
   bool isFocus;
   List<String>? imagePaths;
+  List<String>? imageLinks;
   bool isNew;
 
   Mark({
@@ -19,6 +20,7 @@ class Mark {
     required this.type,
     this.isFocus = false,
     this.imagePaths,
+    this.imageLinks,
     this.isNew = false,
   });
 
@@ -32,6 +34,7 @@ class Mark {
       'type': type,
       'isFocus': isFocus,
       'imagePaths': imagePaths,
+      'imageLinks': imageLinks,
       'isNew': isNew,
     };
   }
@@ -46,6 +49,9 @@ class Mark {
       imagePaths: json['imagePaths'] != null
           ? List<String>.from(json['imagePaths'])
           : null,
+      imageLinks: json['imageLinks'] != null
+          ? List<String>.from(json['imageLinks'])
+          : null,
       isNew: json['isNew'] as bool,
     );
   }
@@ -56,6 +62,7 @@ class Mark {
     int? type,
     bool? isFocus,
     List<String>? imagePaths,
+    List<String>? imageLinks,
     bool? isNew,
   }) {
     return Mark(
@@ -64,6 +71,7 @@ class Mark {
       type: type ?? this.type,
       isFocus: isFocus ?? this.isFocus,
       imagePaths: imagePaths ?? this.imagePaths,
+      imageLinks: imageLinks ?? this.imageLinks,
       isNew: isNew ?? this.isNew,
     );
   }

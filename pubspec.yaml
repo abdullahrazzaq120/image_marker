@@ -1,6 +1,6 @@
 name: image_marker
 description: "A Flutter widget to add, manage, and interact with marks on images."
-version: 0.0.1
+version: 0.0.2
 homepage: "https://github.com/abdullahrazzaq120/image_marker"
 
 environment:

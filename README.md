@@ -17,6 +17,7 @@ Perfect for use cases like:
 - Get callbacks when marks are **added** or **focused**
 - Control marks via a **controller** (e.g., clear all marks, focus marks programmatically)
 - Works with **any screen size** thanks to responsive ratio management
+- Can also save images alongwith positions on marks
 
 ---
 
