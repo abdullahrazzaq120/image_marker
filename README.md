@@ -57,6 +57,9 @@ class ExampleScreen extends StatelessWidget {
   }
 }
 
+
+
+
 ## 🎮 Controller Example
 
 Use the MarkerController to control marks programmatically:
@@ -73,3 +76,7 @@ MarkerScreen(
 
 This project is licensed under the MIT License. See the LICENSE
 file for details.
+
+## 📸 Demo
+
+![Demo](https://raw.githubusercontent.com/abdullahrazzaq120/image_marker/main/screenshots/demo.png)
