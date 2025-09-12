@@ -30,7 +30,10 @@ dependencies:
 image_marker: ^0.0.1
 
 ## Usage
- 
+
+- Use the MarkerController to control marks programmatically:
+
+```dart
 import 'package:image_marker/image_marker.dart';
 import 'package:flutter/material.dart';
 
@@ -54,26 +57,22 @@ class ExampleScreen extends StatelessWidget {
             print('Mark added: ${mark.position}');
           },
           controller: markerController,
+          customCanvasIcon: 'assets/images/test_pin.png',
+          sidebarIconsEnums: const [
+            SidebarIconsEnum.FilledCircle,
+            SidebarIconsEnum.Circle,
+            // SidebarIconsEnum.Cross,
+            // SidebarIconsEnum.ScratchLine,
+            SidebarIconsEnum.Delete,
+            SidebarIconsEnum.Camera,
+            SidebarIconsEnum.CustomIcon,
+          ],
         ),
       ),
     );
   }
 }
-
-
-
-
-## 🎮 Controller Example
-
-Use the MarkerController to control marks programmatically:
-
-final controller = MarkerController();
-
-MarkerScreen(
-  image: 'https://example.com/car.png',
-  controller: controller,
-  onMarkAdded: (mark) => print('Added: ${mark.position}'),
-);
+```
 
 ## 📄 License
 

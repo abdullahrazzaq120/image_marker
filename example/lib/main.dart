@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:image_marker/mark.dart';
 import 'package:image_marker/marker_controller.dart';
 import 'package:image_marker/marker_screen.dart';
+import 'package:image_marker/sidebar_icons_enum.dart';
 
 void main() {
   runApp(const MyApp());
@@ -66,6 +67,15 @@ class ExampleScreen extends StatelessWidget {
             print('Mark added: ${mark.position}');
           },
           controller: controller,
+          sidebarIconsEnums: [
+            SidebarIconsEnum.FilledCircle,
+            SidebarIconsEnum.Circle,
+            // SidebarIconsEnum.Cross,
+            // SidebarIconsEnum.ScratchLine,
+            SidebarIconsEnum.Delete,
+            SidebarIconsEnum.Camera,
+            SidebarIconsEnum.CustomIcon,
+          ],
         ),
       ),
     );
