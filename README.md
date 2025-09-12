@@ -18,6 +18,8 @@ Perfect for use cases like:
 - Control marks via a **controller** (e.g., clear all marks, focus marks programmatically)
 - Works with **any screen size** thanks to responsive ratio management
 - Can also save images alongwith positions on marks
+- User will be able to add a custom image to pin on canvas
+- User will be able to show or hide sidebar icons
 
 ---
 

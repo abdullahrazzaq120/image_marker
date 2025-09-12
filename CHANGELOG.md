@@ -11,3 +11,12 @@
     - `onMarkFocused` → triggered when an existing mark is focused
 - Supports responsive positioning across different screen sizes
 - Includes example app demonstrating usage
+
+## 0.0.2
+
+- Bug fixes
+
+## 0.0.3
+
+- User will be able to add a custom image to pin on canvas
+- User will be able to show or hide sidebar icons
