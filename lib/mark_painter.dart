@@ -1,17 +1,21 @@
 /*
  * Created by Abdullah Razzaq on 10/12/2024.
 */
+import 'dart:ui';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'mark.dart';
 
 class MarkPainter extends CustomPainter {
   final List<Mark> marks;
+  final ui.Image? iconImage;
 
-  MarkPainter({required this.marks});
+  MarkPainter({required this.marks, this.iconImage,});
 
   @override
   void paint(Canvas canvas, Size size) {
-    const markRadius = 6.0;
+    const markRadius = 8.0;
 
     final paint = Paint();
     final borderPaint = Paint()
@@ -82,6 +86,17 @@ class MarkPainter extends CustomPainter {
             canvas.drawLine(mark.position, mark.endPosition!, paint);
           }
           break;
+        case 6:
+          if (iconImage != null) {
+            final dstRect = Rect.fromCenter(
+              center: mark.position,
+              width: 40,
+              height: 40,
+            );
+            final srcRect = Rect.fromLTWH(0, 0, iconImage!.width.toDouble(), iconImage!.height.toDouble());
+
+            canvas.drawImageRect(iconImage!, srcRect, dstRect, Paint());
+          }
         default:
           break;
       }

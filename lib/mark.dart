@@ -5,6 +5,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+
+/// `Mark` represents a mark or annotation on the canvas.
 class Mark {
   Offset position;
   Offset? endPosition;

@@ -4,6 +4,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:image_marker/sidebar_icons_enum.dart';
+import 'package:image_marker/sidebar_item.dart';
 import 'dart:ui' as ui;
 import 'mark.dart';
 
@@ -21,17 +24,15 @@ class AppUtils {
     }
 
     // Calculate the parameter t
-    double t = ((tap.dx - start.dx) * dx + (tap.dy - start.dy) * dy) /
+    double t =
+        ((tap.dx - start.dx) * dx + (tap.dy - start.dy) * dy) /
         (dx * dx + dy * dy);
 
     // Clamp t to the range [0, 1]
     t = t.clamp(0.0, 1.0);
 
     // Find the closest point on the line segment
-    Offset closestPoint = Offset(
-      start.dx + t * dx,
-      start.dy + t * dy,
-    );
+    Offset closestPoint = Offset(start.dx + t * dx, start.dy + t * dy);
 
     // Check the distance from the tap to the closest point
     return closestPoint;
@@ -42,7 +43,10 @@ class AppUtils {
       final Mark focusedMark = marks.firstWhere((mark) {
         if (mark.type == 3) {
           final Offset closestPoint = AppUtils.getClosestPointForLine(
-              tapPosition, mark.position, mark.endPosition!);
+            tapPosition,
+            mark.position,
+            mark.endPosition!,
+          );
           return (tapPosition - closestPoint).distance <= _markRadius;
         }
         return isMarkPositionNear(mark.position, tapPosition);
@@ -58,16 +62,67 @@ class AppUtils {
     return (targetedPosition - tapPosition).distance <= _markRadius;
   }
 
-  static Future<ui.Image> getImageDimensions(String imageUrl) async {
+  static Future<ui.Image> getImageDimensions(String image) async {
     final Completer<ui.Image> completer = Completer();
-    final NetworkImage networkImage = NetworkImage(imageUrl);
+    ImageStream imageStream;
 
-    networkImage.resolve(const ImageConfiguration()).addListener(
-      ImageStreamListener((ImageInfo info, bool _) {
-        completer.complete(info.image);
-      }),
-    );
+    if (image.startsWith('http') || image.startsWith('https')) {
+      // It's a network image
+      imageStream = NetworkImage(image).resolve(const ImageConfiguration());
+    } else {
+      // It's an asset image
+      imageStream = AssetImage(image).resolve(const ImageConfiguration());
+    }
+
+    final listener = ImageStreamListener((ImageInfo info, bool _) {
+      completer.complete(info.image);
+    });
+
+    imageStream.addListener(listener);
+
+    // It's good practice to remove the listener when the future completes
+    // to avoid memory leaks, especially if the completer can complete with an error.
+    completer.future.whenComplete(() => imageStream.removeListener(listener));
 
     return completer.future;
+  }
+
+  // configuration for sidebar items
+  static final Map<SidebarIconsEnum, SideBarItem> allSidebarItems = {
+    SidebarIconsEnum.FilledCircle: SideBarItem(icon: Icons.circle),
+    SidebarIconsEnum.Circle: SideBarItem(
+      icon: Icons.radio_button_unchecked_rounded,
+    ),
+    SidebarIconsEnum.Cross: SideBarItem(icon: Icons.close_sharp),
+    SidebarIconsEnum.ScratchLine: SideBarItem.scratch(),
+    SidebarIconsEnum.Delete: SideBarItem(icon: Icons.delete, isAction: true),
+    SidebarIconsEnum.Camera: SideBarItem(
+      icon: Icons.camera_alt,
+      isAction: true,
+    ),
+    SidebarIconsEnum.CustomIcon: SideBarItem(customCanvasIcon: ''),
+  };
+
+  static List<SideBarItem> getSidebarItems(
+      {
+    List<SidebarIconsEnum>? iconsEnums,
+    String? customCanvasIcon,
+  }) {
+    final enums = iconsEnums ?? SidebarIconsEnum.values;
+    return enums.map((e) {
+      if (e == SidebarIconsEnum.CustomIcon && customCanvasIcon != null) {
+        return SideBarItem(customCanvasIcon: customCanvasIcon, type: e.index);
+      }
+      final baseItem = allSidebarItems[e]!;
+      return baseItem.copyWith(type: e.index); // auto-assign type
+    }).toList();
+  }
+
+  // Utility to load an asset image into a ui.Image
+  static Future<ui.Image> loadUiImage(String assetPath) async {
+    final data = await rootBundle.load(assetPath);
+    final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+    final frame = await codec.getNextFrame();
+    return frame.image;
   }
 }

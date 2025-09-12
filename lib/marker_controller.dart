@@ -20,4 +20,9 @@ class MarkerController {
   void saveAllMarks() {
     _saveAllMarksCallback?.call();
   }
+
+  void dispose() {
+    _clearAllNewMarksCallback = null;
+    _saveAllMarksCallback = null;
+  }
 }

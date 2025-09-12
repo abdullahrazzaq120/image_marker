@@ -7,7 +7,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_marker/mark_images_widget.dart';
-import 'package:image_marker/sidebar_item.dart';
+import 'package:image_marker/sidebar_icons_enum.dart';
 import 'package:image_picker/image_picker.dart' show ImagePicker, ImageSource;
 import 'dart:ui' as ui;
 
@@ -19,15 +19,51 @@ import 'marker_controller.dart';
 class MarkerScreen extends StatefulWidget {
   static String routeName = 'exterior-screen';
 
+  /// The `image` on which marks will be added.
+  /// This should be a URL or a local asset path.
   final String image;
+
+  /// A list of predefined marks to be displayed on the image initially.
   final List<Mark>? defaultMarks;
+
+  /// A callback function that is triggered when a new mark is added to the image.
   final Function(Mark)? onMarkAdded;
+
+  /// A callback function that is triggered when an existing mark is focused (e.g., by tapping on it).
   final Function(Mark)? onMarkFocused;
+
+  /// A callback function that is triggered when the images associated with a mark are clicked.
   final Function(List<String>)? onMarkImagesClick;
+
+  /// A boolean to control the visibility of images associated with a mark.
   final bool? showImages;
+
+  /// A `controller` to programmatically interact with the marker screen,
+  /// such as clearing marks or saving them.
   final MarkerController? controller;
 
-  const MarkerScreen({
+  /// To show/hide the icons from the sidebar
+  ///
+  /// `sidebarIconsEnums` is a list of [SidebarIconsEnum]
+  /// - `SidebarIconsEnum.FilledCircle`
+  ///
+  /// - `SidebarIconsEnum.Circle`
+  ///
+  /// - `SidebarIconsEnum.Cross`
+  ///
+  /// - `SidebarIconsEnum.ScratchLine`
+  ///
+  /// - `SidebarIconsEnum.Delete`
+  ///
+  /// - `SidebarIconsEnum.Camera`
+  ///
+  /// - `SidebarIconsEnum.CustomIcon`
+  ///
+  final List<SidebarIconsEnum>? sidebarIconsEnums;
+
+  final String? customCanvasIcon;
+
+  MarkerScreen({
     super.key,
     required this.image,
     this.defaultMarks,
@@ -36,7 +72,15 @@ class MarkerScreen extends StatefulWidget {
     this.onMarkImagesClick,
     this.showImages,
     this.controller,
-  });
+    this.sidebarIconsEnums,
+    this.customCanvasIcon,
+  }): assert (
+  // if condition is true assert will do nothing otherwise it will show this error msg
+  sidebarIconsEnums == null ||
+      !sidebarIconsEnums.contains(SidebarIconsEnum.CustomIcon) ||
+      customCanvasIcon != null,
+  'If you use SidebarIconsEnum.CustomIcon, you must provide a customIcon',
+  );
 
   @override
   State<MarkerScreen> createState() => _MarkerScreenState();
@@ -46,8 +90,10 @@ class _MarkerScreenState extends State<MarkerScreen> {
   List<Mark> marks = [];
   List<Mark> newMarks = [];
 
-  int globalType = 0;
-  int previousGlobalType = 0;
+  // return the type of 1st item in the list if it exists
+  int globalType = AppUtils.getSidebarItems().first.type ?? 0;
+  int previousGlobalType = AppUtils.getSidebarItems().first.type ?? 0;
+
   Mark? globalFocusedMark;
 
   Offset? _startPoint; // Starting point of the current line
@@ -66,6 +112,7 @@ class _MarkerScreenState extends State<MarkerScreen> {
 
   final GlobalKey _firstItemKey = GlobalKey();
   double scale = 0;
+  ui.Image? customImageIcon;
 
   @override
   void initState() {
@@ -75,6 +122,14 @@ class _MarkerScreenState extends State<MarkerScreen> {
       clearMarks: _clearAllMarks,
       saveAllMarks: _saveAllMarks,
     );
+
+    if(widget.customCanvasIcon != null){
+      AppUtils.loadUiImage(widget.customCanvasIcon!).then((img) {
+        setState(() {
+          customImageIcon = img;
+        });
+      });
+    }
   }
 
   void _clearAllMarks() {
@@ -121,6 +176,14 @@ class _MarkerScreenState extends State<MarkerScreen> {
     if (widget.defaultMarks != null) {
       _initializeDefaultMarks();
     }
+
+    if (widget.sidebarIconsEnums != null && widget.sidebarIconsEnums!.isNotEmpty) {
+      setState(() {
+        globalType = AppUtils.getSidebarItems(iconsEnums: widget.sidebarIconsEnums).first.type!;
+      });
+    } else {
+      globalType = AppUtils.getSidebarItems().first.type!;
+    }
   }
 
   void _initializeDefaultMarks() {
@@ -147,8 +210,6 @@ class _MarkerScreenState extends State<MarkerScreen> {
       availableDeviceHeight = size.height;
       availableDeviceWidth = size.width;
 
-      print('Available Device Height: $availableDeviceHeight');
-      print('Available Device Width: $availableDeviceWidth');
     });
   }
 
@@ -157,9 +218,6 @@ class _MarkerScreenState extends State<MarkerScreen> {
 
     imageHeight = image.height.toDouble();
     imageWidth = image.width.toDouble();
-
-    print('Image Height: $imageHeight');
-    print('Image Width: $imageWidth');
   }
 
   void getDimensionScale() {
@@ -173,9 +231,6 @@ class _MarkerScreenState extends State<MarkerScreen> {
       imageHeight *= scale;
       imageWidth *= scale;
     });
-
-    print('New Image Height: $imageHeight');
-    print('New Image Width: $imageWidth');
   }
 
   void clearFocus() {
@@ -379,10 +434,13 @@ class _MarkerScreenState extends State<MarkerScreen> {
                       },
                       child: Stack(
                         children: [
-                          Image.network(widget.image),
+                          widget.image.startsWith('http') ||
+                                  widget.image.startsWith('https')
+                              ? Image.network(widget.image)
+                              : Image.asset(widget.image),
                           CustomPaint(
                             size: Size.infinite,
-                            painter: MarkPainter(marks: marks),
+                            painter: MarkPainter(marks: marks, iconImage: customImageIcon),
                           ),
                         ],
                       ),
@@ -396,19 +454,23 @@ class _MarkerScreenState extends State<MarkerScreen> {
                   globalFocusedMark != null &&
                   globalFocusedMark!.imagePaths != null &&
                   globalFocusedMark!.imagePaths!.isNotEmpty)
-                MarkImagesWidget(globalFocusedMark: globalFocusedMark, onMarkImagesClick: widget.onMarkImagesClick,),
+                MarkImagesWidget(
+                  globalFocusedMark: globalFocusedMark,
+                  onMarkImagesClick: widget.onMarkImagesClick,
+                ),
             ],
           ),
         ),
         Expanded(
           flex: 1,
           child: Container(
+            height: widget.sidebarIconsEnums == null ? MediaQuery.of(context).size.height / 2.4
+                : widget.sidebarIconsEnums!.length * AppBar().preferredSize.height,
             decoration: BoxDecoration(border: Border.all(color: Colors.black)),
-            height: MediaQuery.of(context).size.height / 2.2,
-            alignment: Alignment.center,
+            // alignment: Alignment.center,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: _buildToolbarIcons(),
+              children: _buildSidebarIcons(),
             ),
           ),
         ),
@@ -416,23 +478,16 @@ class _MarkerScreenState extends State<MarkerScreen> {
     );
   }
 
-  List<Widget> _buildToolbarIcons() {
-    final List<SideBarItem> items = [
-      SideBarItem(type: 0, icon: Icons.circle),
-      SideBarItem(type: 1, icon: Icons.radio_button_unchecked_rounded),
-      SideBarItem(type: 2, icon: Icons.close_sharp),
-      SideBarItem.divider(type: 3),
-      SideBarItem(type: 4, icon: Icons.delete, isAction: true),
-      SideBarItem(type: 5, icon: Icons.camera_alt, isAction: true),
-    ];
-
+  List<Widget> _buildSidebarIcons() {
+    final items = AppUtils.getSidebarItems(iconsEnums: widget.sidebarIconsEnums, customCanvasIcon: widget.customCanvasIcon);
     return items.map((item) {
       Widget child;
       Color color;
       final bool isSelected = globalType == item.type;
 
       if (item.isAction) {
-        final bool isEnabled = globalFocusedMark != null && globalFocusedMark!.isNew;
+        final bool isEnabled =
+            globalFocusedMark != null && globalFocusedMark!.isNew;
         color = isEnabled
             ? (isSelected ? Colors.red : Colors.teal)
             : Colors.grey;
@@ -440,13 +495,15 @@ class _MarkerScreenState extends State<MarkerScreen> {
         color = isSelected ? Colors.red : Colors.teal;
       }
 
-      if (item.isDivider) {
+      if (item.isScratch) {
         child = Divider(thickness: 4, endIndent: 4, indent: 4, color: color);
+      } else if (item.customCanvasIcon != null) {
+        child = Image.asset(item.customCanvasIcon!);
       } else {
         child = Icon(item.icon, color: color, size: 25);
       }
 
-      return markIcon(selectedType: item.type, child: child);
+      return markIcon(selectedType: item.type!, child: child);
     }).toList();
   }
 
