@@ -20,3 +20,6 @@
 
 - User will be able to add a custom image to pin on canvas
 - User will be able to show or hide sidebar icons
+
+## 0.0.4
+- bug fixes
