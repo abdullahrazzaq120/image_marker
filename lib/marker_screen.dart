@@ -77,7 +77,7 @@ class MarkerScreen extends StatefulWidget {
   }): assert (
   // if condition is true assert will do nothing otherwise it will show this error msg
   sidebarIconsEnums == null ||
-      !sidebarIconsEnums.contains(SidebarIconsEnum.CustomIcon) ||
+      !sidebarIconsEnums.contains(SidebarIconsEnum.customIcon) ||
       customCanvasIcon != null,
   'If you use SidebarIconsEnum.CustomIcon, you must provide a customIcon',
   );

@@ -9,10 +9,11 @@ import 'package:flutter/material.dart';
 import 'mark.dart';
 
 class MarkImagesWidget extends StatelessWidget {
-  Mark? globalFocusedMark;
+
+  final Mark? globalFocusedMark;
   final Function(List<String>)? onMarkImagesClick;
 
-  MarkImagesWidget({super.key, this.globalFocusedMark, this.onMarkImagesClick});
+  const MarkImagesWidget({super.key, this.globalFocusedMark, this.onMarkImagesClick});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +33,7 @@ class MarkImagesWidget extends StatelessWidget {
             border: Border.all(color: Colors.black12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: const Color(0x1A000000), // Black with 10% opacity
                 blurRadius: 5,
                 offset: const Offset(0, 3),
               ),

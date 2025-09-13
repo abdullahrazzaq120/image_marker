@@ -89,18 +89,18 @@ class AppUtils {
 
   // configuration for sidebar items
   static final Map<SidebarIconsEnum, SideBarItem> allSidebarItems = {
-    SidebarIconsEnum.FilledCircle: SideBarItem(icon: Icons.circle),
-    SidebarIconsEnum.Circle: SideBarItem(
+    SidebarIconsEnum.filledCircle: SideBarItem(icon: Icons.circle),
+    SidebarIconsEnum.circle: SideBarItem(
       icon: Icons.radio_button_unchecked_rounded,
     ),
-    SidebarIconsEnum.Cross: SideBarItem(icon: Icons.close_sharp),
-    SidebarIconsEnum.ScratchLine: SideBarItem.scratch(),
-    SidebarIconsEnum.Delete: SideBarItem(icon: Icons.delete, isAction: true),
-    SidebarIconsEnum.Camera: SideBarItem(
+    SidebarIconsEnum.cross: SideBarItem(icon: Icons.close_sharp),
+    SidebarIconsEnum.scratchLine: SideBarItem.scratch(),
+    SidebarIconsEnum.delete: SideBarItem(icon: Icons.delete, isAction: true),
+    SidebarIconsEnum.camera: SideBarItem(
       icon: Icons.camera_alt,
       isAction: true,
     ),
-    SidebarIconsEnum.CustomIcon: SideBarItem(customCanvasIcon: ''),
+    SidebarIconsEnum.customIcon: SideBarItem(customCanvasIcon: ''),
   };
 
   static List<SideBarItem> getSidebarItems(
@@ -110,7 +110,7 @@ class AppUtils {
   }) {
     final enums = iconsEnums ?? SidebarIconsEnum.values;
     return enums.map((e) {
-      if (e == SidebarIconsEnum.CustomIcon && customCanvasIcon != null) {
+      if (e == SidebarIconsEnum.customIcon && customCanvasIcon != null) {
         return SideBarItem(customCanvasIcon: customCanvasIcon, type: e.index);
       }
       final baseItem = allSidebarItems[e]!;
